@@ -1,394 +1,123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumen Wallet</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartLight — Smart Home Automation</title>
 <style>
-  :root{
-    --bg: #0A0F14;
-    --surface: #12181F;
-    --surface-2: #1A222B;
-    --hairline: #262F3A;
-    --text-primary: #EDEAE2;
-    --text-muted: #7C8A93;
-    --amber: #E8B04B;
-    --amber-dim: #3E3320;
-    --cyan: #4FC6D9;
-    --cyan-dim: #17323A;
-    --violet: #A78BE0;
-    --violet-dim: #2A2440;
-    --red: #E2635C;
-    --red-dim: #3A2020;
-  }
+:root{--bg:#07111f;--card:#0e1d31;--line:#24405f;--text:#edf7ff;--muted:#91abc3;--cyan:#4de4ff;--gold:#ffd166;--green:#57e389}
+*{box-sizing:border-box}body{margin:0;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(circle at 12% 4%,#17425d 0,transparent 30%),radial-gradient(circle at 90% 12%,#432a55 0,transparent 28%),var(--bg)}
+.wrap{max-width:1200px;margin:auto;padding:28px 18px 70px}.hero,.card,.room,.metric{background:#0d1b2d;border:1px solid var(--line);border-radius:22px}
+.hero{padding:32px;background:linear-gradient(135deg,#102943,#0b1628);box-shadow:0 20px 70px #0006}.eyebrow{color:var(--cyan);font-weight:800;letter-spacing:2px;font-size:12px}h1{font-size:clamp(36px,6vw,68px);margin:8px 0;line-height:1}.hero p,.sub,.status{color:var(--muted)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:20px}.step{background:#132a43;border:1px solid var(--line);padding:9px 12px;border-radius:12px}.arrow{color:var(--cyan)}
+.metrics,.rooms,.lower{display:grid;gap:15px}.metrics{grid-template-columns:repeat(4,1fr);margin:18px 0}.metric{padding:18px}.label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}.metric b{display:block;font-size:28px;margin-top:6px}
+.rooms{grid-template-columns:repeat(3,1fr)}.room{padding:20px;overflow:hidden}.room.on{box-shadow:0 0 0 1px #4de4ff66,0 15px 50px #4de4ff18}.roomHead{display:flex;justify-content:space-between;align-items:center}.room h2{margin:0}.bulb{text-align:center;font-size:64px;padding:14px;text-shadow:none;filter:grayscale(1)}.room.on .bulb{filter:none;text-shadow:0 0 30px var(--gold)}
+.power,.secondary{cursor:pointer;border-radius:999px;padding:9px 15px;border:1px solid var(--line);background:#263a52;color:white;font-weight:800}.power.on{background:var(--green);color:#06200e}.range{width:100%;accent-color:var(--cyan)}.value{font-size:32px;font-weight:900}.mini{display:flex;justify-content:space-between;margin-top:8px}
+.lower{grid-template-columns:1.1fr .9fr;margin-top:18px}.card{padding:20px}.card h2{margin:0 0 5px}.notice{padding:12px;border:1px solid #ffd16655;background:#ffd16612;border-radius:12px;color:#f7d98b;font-size:13px}
+table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-size:11px}.pill{padding:4px 8px;border-radius:99px;font-size:11px;font-weight:800}.pill.on{color:var(--green);background:#57e38922}.pill.off{color:var(--muted);background:#fff1}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.secondary{border-radius:10px;background:#172b43}
+textarea{width:100%;height:340px;background:#07111b;color:#bcecff;border:1px solid var(--line);border-radius:14px;padding:14px;font:12px/1.5 Consolas,monospace;resize:vertical}
+.log{color:var(--muted);font-size:13px}.log div{padding:7px 0;border-bottom:1px solid var(--line)}footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px}
+@media(max-width:850px){.metrics,.rooms,.lower{grid-template-columns:1fr 1fr}}@media(max-width:600px){.metrics,.rooms,.lower{grid-template-columns:1fr}}
+</style></head>
+<body><div class="wrap">
+<section class="hero">
+<div class="eyebrow">SMART HOME AUTOMATION / SMARTLIGHT</div>
+<h1>Room-by-room light intelligence.</h1>
+<p>Interactive visualization of the SmartLight object model. Each bulb maintains its own power and brightness state. The master spreadsheet below mirrors the live state and can be exported as CSV for Excel or Google Sheets.</p>
+<div class="flow"><span class="step">Create 3 objects</span><b class="arrow">→</b><span class="step">Toggle power</span><b class="arrow">→</b><span class="step">Validate 0–100%</span><b class="arrow">→</b><span class="step">Track state</span><b class="arrow">→</b><span class="step">Export</span></div>
+</section>
+<section class="metrics">
+<div class="metric"><span class="label">Lights ON</span><b id="onCount">0 / 3</b></div>
+<div class="metric"><span class="label">Average brightness</span><b id="avg">0%</b></div>
+<div class="metric"><span class="label">Total light output</span><b id="total">0%</b></div>
+<div class="metric"><span class="label">System state</span><b id="system">IDLE</b></div>
+</section>
+<section class="rooms" id="rooms"></section>
+<section class="lower">
+<div class="card"><h2>Master Spreadsheet</h2><div class="sub">Live spreadsheet-style view of all SmartLight objects.</div>
+<div class="notice">Columns: Room Location · Power · Brightness (%). Every control change updates this master table.</div>
+<div style="overflow:auto"><table><thead><tr><th>Room Location</th><th>Power</th><th>Brightness</th></tr></thead><tbody id="sheet"></tbody></table></div>
+<div class="actions"><button class="secondary" onclick="exportCSV()">Export Master Spreadsheet (CSV)</button><button class="secondary" onclick="resetAll()">Reset All Lights</button></div></div>
+<div class="card"><h2>Embedded Python Code</h2><div class="sub">The Python implementation is embedded here as the project reference source. Browser controls use equivalent JavaScript logic.</div>
+<textarea readonly>class SmartLight:
+    def __init__(self, roomLocation, isOn=False, brightness=0):
+        self.roomLocation = roomLocation
+        self.isOn = isOn
+        self.brightness = brightness
 
-  *{ margin:0; padding:0; box-sizing:border-box; }
+    def togglePower(self):
+        self.isOn = not self.isOn
+        if not self.isOn:
+            self.brightness = 0
+        print(f"{self.roomLocation}: Power toggled {'ON' if self.isOn else 'OFF'}.")
 
-  body{
-    background: var(--bg);
-    color: var(--text-primary);
-    font-family: 'IBM Plex Sans', sans-serif;
-    padding: 40px 24px 80px;
-    min-height: 100vh;
-  }
+    def setBrightness(self, level):
+        if not self.isOn:
+            print(f"{self.roomLocation}: Cannot set brightness - light is OFF.")
+            return
+        if 0 &lt;= level &lt;= 100:
+            self.brightness = level
+            print(f"{self.roomLocation}: Brightness set to {self.brightness}%.")
+        else:
+            print(f"{self.roomLocation}: Invalid brightness level. Use 0-100.")
 
-  .wrap{ max-width: 1080px; margin: 0 auto; }
+    def getStatus(self):
+        state = "ON" if self.isOn else "OFF"
+        print(f"{self.roomLocation}: Power={state}, Brightness={self.brightness}%.")
 
-  /* ---- Header ---- */
-  header{
-    display:flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--hairline);
-    margin-bottom: 32px;
-  }
-  .brand{ display:flex; align-items:center; gap: 10px; }
-  .brand-mark{
-    width: 34px; height: 34px;
-    border-radius: 9px;
-    background: linear-gradient(155deg, var(--amber), #B9822A);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Space Grotesk', sans-serif;
-    font-weight:700; color:#0A0F14; font-size:16px;
-  }
-  .brand-name{ font-family:'Space Grotesk', sans-serif; font-size: 19px; font-weight: 600; }
-  .brand-sub{ font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
 
-  .hero-figure{ text-align: right; }
-  .hero-figure .label{ font-size: 12.5px; color: var(--text-muted); margin-bottom: 4px; }
-  .hero-figure .value{
-    font-family:'Space Grotesk', sans-serif;
-    font-size: 34px; font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-  .hero-figure .value span{ font-size: 15px; color: var(--text-muted); font-weight: 500; }
+def main():
+    livingRoom = SmartLight("Living Room")
+    kitchen = SmartLight("Kitchen")
+    study = SmartLight("Study")
 
-  /* ---- Room accounts ---- */
-  .accounts{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-    margin-bottom: 28px;
-  }
-  @media (max-width: 900px){ .accounts{ grid-template-columns: 1fr; } }
+    livingRoom.togglePower()
+    livingRoom.setBrightness(75)
 
-  .account{
-    background: var(--surface);
-    border: 1px solid var(--hairline);
-    border-radius: 16px;
-    padding: 20px;
-    display:flex;
-    flex-direction:column;
-  }
+    study.togglePower()
+    study.setBrightness(30)
 
-  .account-top{
-    display:flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 14px;
-  }
-  .account-name{ font-family:'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600; }
-  .status-pill{
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-  .status-pill.on{ background: var(--amber-dim); color: var(--amber); }
-  .status-pill.off{ background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--hairline); }
+    kitchen.setBrightness(50)      # Fails because Kitchen is OFF
+    livingRoom.setBrightness(150)  # Fails because 150 is outside 0-100
 
-  .gauge-row{
-    display:flex;
-    align-items:center;
-    gap: 16px;
-    padding: 10px 0 16px;
-  }
-  .gauge-numbers{ flex:1; }
-  .balance-label{ font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-  .balance-value{
-    font-family:'Space Grotesk', sans-serif;
-    font-size: 26px; font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-  .balance-value span{ font-size: 14px; color: var(--text-muted); font-weight: 500; margin-left: 2px;}
+    study.togglePower()            # OFF; brightness becomes 0
 
-  .ledger-title{
-    font-size: 12px;
-    color: var(--text-muted);
-    margin: 8px 0 10px;
-    display:flex; justify-content: space-between;
-  }
-  .ledger{ display:flex; flex-direction:column; gap: 7px; flex: 1; }
-  .entry{
-    display:flex;
-    align-items:center;
-    gap: 10px;
-    padding: 9px 10px;
-    border-radius: 10px;
-    background: var(--surface-2);
-  }
-  .entry.failed{ background: transparent; border: 1px dashed var(--hairline); opacity: 0.75; }
-  .entry-icon{
-    width: 26px; height: 26px;
-    border-radius: 7px;
-    display:flex; align-items:center; justify-content:center;
-    font-size: 12.5px;
-    flex-shrink: 0;
-  }
-  .entry-icon.power-on{ background: var(--amber-dim); color: var(--amber); }
-  .entry-icon.power-off{ background: var(--surface); color: var(--text-muted); border: 1px solid var(--hairline); }
-  .entry-icon.adjust{ background: var(--cyan-dim); color: var(--cyan); }
-  .entry-icon.blocked{ background: var(--red-dim); color: var(--red); }
+    print("\nFinal Status:")
+    livingRoom.getStatus()
+    kitchen.getStatus()
+    study.getStatus()
 
-  .entry-info{ flex: 1; min-width: 0; }
-  .entry-title{ font-size: 12.5px; font-weight: 500; }
-  .entry-sub{ font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
-  .entry-amount{
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 12px;
-    text-align: right;
-    white-space: nowrap;
-  }
-  .entry-amount.adjust{ color: var(--cyan); }
-  .entry-amount.blocked{ color: var(--red); }
-  .entry-amount.neutral{ color: var(--text-muted); }
 
-  /* ---- Grid overview ---- */
-  .compare{
-    background: var(--surface);
-    border: 1px solid var(--hairline);
-    border-radius: 16px;
-    padding: 22px;
-  }
-  .compare-title{ font-family:'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-  .compare-sub{ font-size: 12.5px; color: var(--text-muted); margin-bottom: 18px; }
-
-  .bar-row{ margin-bottom: 14px; }
-  .bar-label{ display:flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
-  .bar-label .amt{ font-family:'IBM Plex Mono', monospace; color: var(--text-muted); }
-  .bar-track{ height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
-  .bar-fill{ height: 100%; border-radius: 6px; }
-
-  .verdict{
-    margin-top: 18px;
-    padding-top: 16px;
-    border-top: 1px solid var(--hairline);
-    font-size: 13.5px;
-    color: var(--text-muted);
-  }
-  .verdict b{ color: var(--text-primary); font-weight: 600; }
-
-  footer{
-    text-align:center;
-    font-size: 11.5px;
-    color: var(--text-muted);
-    margin-top: 40px;
-  }
-</style>
-</head>
-<body>
-
-<div class="wrap">
-
-  <header>
-    <div class="brand">
-      <div class="brand-mark">LW</div>
-      <div>
-        <div class="brand-name">Lumen Wallet</div>
-        <div class="brand-sub">Room-by-room power &amp; brightness ledger</div>
-      </div>
-    </div>
-    <div class="hero-figure">
-      <div class="label">Lights currently on</div>
-      <div class="value" id="lightsOn">– <span>of 3 rooms</span></div>
-    </div>
-  </header>
-
-  <div class="accounts" id="accounts"></div>
-
-  <div class="compare">
-    <div class="compare-title">Brightness across the house</div>
-    <div class="compare-sub">Current output per room, on a 0–100 scale.</div>
-    <div id="compareBars"></div>
-    <div class="verdict" id="verdict"></div>
-  </div>
-
-  <footer>Ledger is simulated from each bulb's local state, not a live device feed.</footer>
-
+if __name__ == "__main__":
+    main()
+</textarea></div>
+</section>
+<section class="card" style="margin-top:18px"><h2>Object State Timeline</h2><div class="sub">Interactions are recorded locally in this browser session.</div><div id="log" class="log">No interactions yet.</div></section>
+<footer>SmartLight project • Local simulation • Spreadsheet-compatible CSV export</footer>
 </div>
-
 <script>
-  /* =========================================================
-     SmartLight logic — ported 1:1 from the Python class.
-     togglePower(), setBrightness() and getStatus() keep the
-     same rules; each call also pushes a ledger entry for the
-     UI below.
-     ========================================================= */
-
-  class SmartLight {
-    constructor(roomLocation, isOn = false, brightness = 0) {
-      this.roomLocation = roomLocation;
-      this.isOn = isOn;
-      this.brightness = brightness;
-      this.ledger = [];
-    }
-
-    togglePower() {
-      this.isOn = !this.isOn;
-      if (!this.isOn) {
-        this.brightness = 0; // an off light holds no brightness reading
-      }
-      this.ledger.push({
-        type: this.isOn ? "power-on" : "power-off",
-        title: this.isOn ? "Powered on" : "Powered off",
-        sub: this.isOn ? "Ready to adjust brightness" : "Brightness reset to 0%",
-        amount: this.isOn ? "ON" : "OFF"
-      });
-    }
-
-    setBrightness(level) {
-      if (!this.isOn) {
-        this.ledger.push({
-          type: "blocked",
-          title: `Set brightness → ${level}%`,
-          sub: "Declined — light is OFF",
-          amount: "Declined"
-        });
-        return;
-      }
-      if (level < 0 || level > 100) {
-        this.ledger.push({
-          type: "blocked",
-          title: `Set brightness → ${level}%`,
-          sub: "Declined — out of 0–100 range",
-          amount: "Declined"
-        });
-        return;
-      }
-      this.brightness = level;
-      this.ledger.push({
-        type: "adjust",
-        title: "Brightness adjusted",
-        sub: `Set to ${level}%`,
-        amount: `${level}%`
-      });
-    }
-
-    getStatus() {
-      return { room: this.roomLocation, isOn: this.isOn, brightness: this.brightness };
-    }
-  }
-
-  /* ---- Run the same sequence as the Python main() ---- */
-  const livingRoom = new SmartLight("Living Room");
-  const kitchen = new SmartLight("Kitchen");
-  const study = new SmartLight("Study");
-
-  livingRoom.togglePower();        // ON
-  livingRoom.setBrightness(75);    // succeeds
-
-  study.togglePower();             // ON
-  study.setBrightness(30);         // succeeds
-
-  kitchen.setBrightness(50);       // declined — still OFF
-
-  livingRoom.setBrightness(150);   // declined — out of range
-
-  study.togglePower();             // OFF, brightness resets to 0
-
-  /* =========================================================
-     Rendering — banking-app style room accounts + ledger
-     ========================================================= */
-
-  function iconFor(entry) {
-    if (entry.type === "power-on") return "⏻";
-    if (entry.type === "power-off") return "⏻";
-    if (entry.type === "adjust") return "◎";
-    return "×";
-  }
-
-  function gaugeSVG(pct, color) {
-    const r = 27, stroke = 6, c = 2 * Math.PI * r;
-    const offset = c * (1 - pct);
-    return `
-      <svg width="68" height="68" viewBox="0 0 68 68" style="flex-shrink:0;">
-        <circle cx="34" cy="34" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="${stroke}"/>
-        <circle cx="34" cy="34" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}"
-          stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
-          transform="rotate(-90 34 34)"/>
-        <text x="34" y="39" text-anchor="middle" font-family="Space Grotesk, sans-serif"
-          font-size="13" font-weight="600" fill="var(--text-primary)">${Math.round(pct*100)}%</text>
-      </svg>
-    `;
-  }
-
-  function accountCardHTML(light, accentColor) {
-    const pct = light.brightness / 100;
-
-    const entriesHTML = light.ledger.map(e => `
-      <div class="entry ${e.type === 'blocked' ? 'failed' : ''}">
-        <div class="entry-icon ${e.type}">${iconFor(e)}</div>
-        <div class="entry-info">
-          <div class="entry-title">${e.title}</div>
-          <div class="entry-sub">${e.sub}</div>
-        </div>
-        <div class="entry-amount ${e.type === 'adjust' ? 'adjust' : e.type === 'blocked' ? 'blocked' : 'neutral'}">${e.amount}</div>
-      </div>
-    `).join("");
-
-    return `
-      <div class="account">
-        <div class="account-top">
-          <div class="account-name">${light.roomLocation}</div>
-          <div class="status-pill ${light.isOn ? 'on' : 'off'}">${light.isOn ? 'ON' : 'OFF'}</div>
-        </div>
-
-        <div class="gauge-row">
-          ${gaugeSVG(pct, accentColor)}
-          <div class="gauge-numbers">
-            <div class="balance-label">Brightness</div>
-            <div class="balance-value">${light.brightness}<span>%</span></div>
-          </div>
-        </div>
-
-        <div class="ledger-title"><span>Activity</span><span>${light.ledger.length} events</span></div>
-        <div class="ledger">${entriesHTML}</div>
-      </div>
-    `;
-  }
-
-  document.getElementById("accounts").innerHTML =
-    accountCardHTML(livingRoom, "#E8B04B") +
-    accountCardHTML(kitchen, "#4FC6D9") +
-    accountCardHTML(study, "#A78BE0");
-
-  const rooms = [
-    { light: livingRoom, color: "#E8B04B" },
-    { light: kitchen, color: "#4FC6D9" },
-    { light: study, color: "#A78BE0" }
-  ];
-
-  const onCount = rooms.filter(r => r.light.isOn).length;
-  document.getElementById("lightsOn").innerHTML = `${onCount} <span>of 3 rooms</span>`;
-
-  document.getElementById("compareBars").innerHTML = rooms.map(r => `
-    <div class="bar-row">
-      <div class="bar-label"><span>${r.light.roomLocation}</span><span class="amt">${r.light.brightness}%</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${r.light.brightness}%; background:${r.color};"></div></div>
-    </div>
-  `).join("");
-
-  const brightest = rooms.reduce((a, b) => (b.light.brightness > a.light.brightness ? b : a));
-  document.getElementById("verdict").innerHTML = brightest.light.brightness > 0
-    ? `<b>${brightest.light.roomLocation}</b> is currently the brightest room, at ${brightest.light.brightness}%.`
-    : `No room is currently lit.`;
-</script>
-
-</body>
-</html>
+class SmartLight{
+ constructor(roomLocation,isOn=false,brightness=0){this.roomLocation=roomLocation;this.isOn=isOn;this.brightness=brightness}
+ togglePower(){this.isOn=!this.isOn;if(!this.isOn)this.brightness=0;addLog(this.roomLocation+" → "+(this.isOn?"ON":"OFF"));render()}
+ setBrightness(level){if(!this.isOn){addLog(this.roomLocation+" → rejected "+level+"% (light OFF)");render();return}if(level<0||level>100){addLog(this.roomLocation+" → rejected "+level+"% (must be 0–100)");render();return}this.brightness=level;addLog(this.roomLocation+" → brightness "+level+"%");render()}
+ getStatus(){return{room:this.roomLocation,isOn:this.isOn,brightness:this.brightness}}
+}
+const lights=[new SmartLight("Living Room"),new SmartLight("Kitchen"),new SmartLight("Study")];let events=[];
+function addLog(x){events.unshift(new Date().toLocaleTimeString()+"  "+x);events=events.slice(0,12)}
+function render(){
+ const colors=["#ffd166","#4de4ff","#b992ff"];
+ document.getElementById("rooms").innerHTML=lights.map((l,i)=>`<article class="room ${l.isOn?"on":""}">
+ <div class="roomHead"><div><h2>${l.roomLocation}</h2><div class="status">${l.isOn?"ACTIVE":"STANDING BY"} • independent object state</div></div>
+ <button class="power ${l.isOn?"on":""}" onclick="lights[${i}].togglePower()">${l.isOn?"ON":"OFF"}</button></div>
+ <div class="bulb">💡</div><div class="label">Brightness</div><div class="value">${l.brightness}%</div>
+ <input class="range" type="range" min="0" max="100" value="${l.brightness}" ${l.isOn?"":"disabled"} oninput="lights[${i}].setBrightness(Number(this.value))" style="accent-color:${colors[i]}">
+ <div class="mini"><span class="label">0%</span><span class="label">100%</span></div></article>`).join("");
+ const on=lights.filter(l=>l.isOn).length,total=lights.reduce((s,l)=>s+l.brightness,0);
+ document.getElementById("onCount").textContent=on+" / 3";document.getElementById("avg").textContent=Math.round(total/3)+"%";document.getElementById("total").textContent=total+"%";document.getElementById("system").textContent=on?"ACTIVE":"IDLE";
+ document.getElementById("sheet").innerHTML=lights.map(l=>`<tr><td>${l.roomLocation}</td><td><span class="pill ${l.isOn?"on":"off"}">${l.isOn?"ON":"OFF"}</span></td><td>${l.brightness}%</td></tr>`).join("");
+ document.getElementById("log").innerHTML=events.length?events.map(e=>"<div>"+e+"</div>").join(""):"No interactions yet.";
+}
+function resetAll(){lights.forEach(l=>{l.isOn=false;l.brightness=0});addLog("All lights reset");render()}
+function exportCSV(){let csv="Room Location,Power,Brightness (%)\n"+lights.map(l=>`${l.roomLocation},${l.isOn?"ON":"OFF"},${l.brightness}`).join("\n");let blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="SmartLight_Master_Spreadsheet.csv";a.click();URL.revokeObjectURL(a.href)}
+render();
+</script></body></html>
